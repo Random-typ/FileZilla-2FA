@@ -54,10 +54,11 @@ def updatePasswords(_scheduler):
                 if child.get("name") == user["name"]:
                     totp = pyotp.TOTP(user["token"])
                     child.find("d:password", ns).find("d:hash", ns).text = getHash(user["password"] + totp.now(), child.find("d:password", ns).find("d:salt", ns).text).decode("utf8")
+    etree.(config)
     #with open('users.xml', 'wb') as f:
-    f2 = StringIO()
+    #f2 = StringIO()
     #etree.ElementTree(root).write_c14n(f2)
-    tree.write_c14n(f2.buffer)
+    #tree.write_c14n(f2.buffer)
     f = open('users.xml', 'wb')
     #tree.getroot().addprevious(etree.ProcessingInstruction('xml', 'version=1.0'))
     f.write(f2.getvalue())
