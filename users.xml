@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<filezilla xmlns:fz="https://filezilla-project.org" xmlns="https://filezilla-project.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" fz:product_flavour="standard" fz:product_version="1.7.3">
+	<default_impersonator index="0" enabled="false">
+		<name></name>
+		<password></password>
+	</default_impersonator>
+	<user name="&lt;system user>" enabled="false">
+		<rate_limits inbound="unlimited" outbound="unlimited" session_inbound="unlimited" session_outbound="unlimited" />
+		<allowed_ips></allowed_ips>
+		<disallowed_ips></disallowed_ips>
+		<description>This user can impersonate any system user.</description>
+		<impersonation login_only="false" />
+		<methods>1</methods>
+	</user>
+	<user name="marco" enabled="true">
+		<mount_point tvfs_path="/" native_path="F:\marco_dc_bot" access="1" recursive="2" flags="1" />
+		<rate_limits inbound="16777216" outbound="1048576" session_inbound="unlimited" session_outbound="unlimited" />
+		<allowed_ips></allowed_ips>
+		<disallowed_ips></disallowed_ips>
+		<description></description>
+		<password index="1">
+			<hash>cpsUnQZOW6EEAOk1Bd0Sc5/OHiVWmy2m3BTr9Gm5jyQ</hash>
+			<salt>xWNPODqgmPmkMfeYn6Kz6FmRggpYDMFWVusqirQvvcg</salt>
+			<iterations>100000</iterations>
+		</password>
+		<methods>1</methods>
+	</user>
+</filezilla>
