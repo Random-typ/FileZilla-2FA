@@ -13,7 +13,7 @@ import qrcode
 from io import StringIO
 from PIL import Image
 import sys
-
+f
 def getHash(_password, _salt, _iterations = 100000):
     return base64.b64encode(hashlib.pbkdf2_hmac(
     'SHA256',
