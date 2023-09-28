@@ -3,24 +3,20 @@ import pyotp
 import hashlib
 import base64
 from lxml import etree
-#from xml.etree.ElementTree import ElementTree
-import sched
-import time
 import os
 import secrets
 import string
 import qrcode
-from io import StringIO
-from PIL import Image
 import sys
-f
+import threading
+
 def getHash(_password, _salt, _iterations = 100000):
     return base64.b64encode(hashlib.pbkdf2_hmac(
     'SHA256',
     _password.encode('utf-8'),
     _salt.encode('utf-8'),
     _iterations
-    ))
+    ))[0:43]# hash has length of 43 characters
 
 def userHas2FAEnabled(_user):
     for user in config["users"]:
@@ -43,49 +39,43 @@ def loadUsers():
             })
 
 def UpdateFTPServer():
-    return
     os.system("SC control filezilla-server paramchange")# makes the ftp server reload its config
 
-def updatePasswords(_scheduler):
-    #_scheduler.enter(30, 1, updatePasswords, (_scheduler,))#start next check in 30 seconds
+def updatePasswords():
+    threading.Timer(30, updatePasswords).start()#start next check in 30 seconds
     for user in config["users"]:
         if user["2FAEnabled"] == True:
             for child in root.findall('d:user', ns):
                 if child.get("name") == user["name"]:
                     totp = pyotp.TOTP(user["token"])
                     child.find("d:password", ns).find("d:hash", ns).text = getHash(user["password"] + totp.now(), child.find("d:password", ns).find("d:salt", ns).text).decode("utf8")
-    etree.(config)
-    #with open('users.xml', 'wb') as f:
-    #f2 = StringIO()
-    #etree.ElementTree(root).write_c14n(f2)
-    #tree.write_c14n(f2.buffer)
     f = open('users.xml', 'wb')
-    #tree.getroot().addprevious(etree.ProcessingInstruction('xml', 'version=1.0'))
-    f.write(f2.getvalue())
+    f.write(b'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n' + etree.tostring(tree, method='c14n'))
     f.close()
-        #ElementTree(root).write(f, encoding="utf-8", xml_declaration=True, default_namespace=None, method='xml', short_empty_elements=False)
     UpdateFTPServer()
 
+# first time run stuff:
+# create files
+# find users.xml
 
 
+
+
+# config file for this script
 configFile = open("config.json")
 config = json.loads(configFile.read())
 configFile.close()
 
-#lxml.register_namespace('', "https://filezilla-project.org")
+# user config of the FTP server
 tree = etree.parse(r'users.xml')
-#tree.register_namespace('', "https://filezilla-project.org")
 root = tree.getroot()
 ns = {"d": "https://filezilla-project.org"}
 loadUsers()
 
 # run updatePasswords every 30 seconds
-scheduler = sched.scheduler(time.time, time.sleep)
-scheduler.enter(3, 1, updatePasswords, (scheduler,))
-scheduler.run()
+threading.Timer(0, updatePasswords).start()
 
-
-
+# CLI commands
 while True:
     with open("config.json", "w") as outfile:
         json.dump(config, outfile)
@@ -152,21 +142,3 @@ while True:
                 input("Press enter to continue")
                 continue
             
-
-
-
-#salt = base64.b64decode("xWNPODqgmPmkMfeYn6Kz6FmRggpYDMFWVusqirQvvcg=")
-#password = "G2tEY659X5e6bZ"
-#print(getHash(password, salt).decode('utf-8'))
-
-
-
-
-
-
-#with open("config.json", "w") as outfile:
-#    json.dump(config, outfile)
-
-
-#totp = pyotp.TOTP('base32secret3232')
-#totp.now()
