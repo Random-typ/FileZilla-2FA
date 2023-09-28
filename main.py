@@ -9,6 +9,8 @@ import string
 import qrcode
 import sys
 import threading
+import pyuac
+from io import StringIO
 
 def getHash(_password, _salt, _iterations = 100000):
     return base64.b64encode(hashlib.pbkdf2_hmac(
@@ -54,20 +56,45 @@ def updatePasswords():
     f.close()
     UpdateFTPServer()
 
-# first time run stuff:
-# create files
-# find users.xml
+# check privileges. C:/ProgramData/filezilla-server/users.xml needs admin privileges
+if not pyuac.isUserAdmin():
+    input("Script has to be run as admin. Press enter to run script as admin.")
+    pyuac.runAsAdmin()
 
+# create config 
+if not os.path.exists('config.json'):
+    open('config.json', 'w').write(json.dumps({
+        "ftp-users": "C:/ProgramData/filezilla-server/users.xml",
+        "users": [],
+        }))
 
-
-
-# config file for this script
+# load config
 configFile = open("config.json")
 config = json.loads(configFile.read())
 configFile.close()
 
-# user config of the FTP server
-tree = etree.parse(r'users.xml')
+# locate ftp users config
+while not os.path.exists(config['ftp-users']):
+    print("Failed to locate ftp users config at: " + config['ftp-users'])
+    path = input("If the path is not correct, enter the correct path here. \nIf the path is correct press enter:")
+    if len(path) != 0:
+        config['ftp-users'] = path
+
+
+# load user config of the FTP server
+configFile = open(config["ftp-users"])
+# check if users.xml is ok
+try:
+    etree.parse(StringIO(configFile.read()))
+except:
+    print(f"Failed to load {config['ftp-users']}. Make sure there are user profiles in your server.")
+    input("Press Enter to continue")
+    configFile.close()
+    exit()
+
+# users.xml is ok
+tree = etree.parse(configFile.read())
+configFile.close()
 root = tree.getroot()
 ns = {"d": "https://filezilla-project.org"}
 loadUsers()
@@ -83,16 +110,17 @@ while True:
     print("Users:")
     for user in config["users"]:
         print(user["name"], " 2FA enabled: ", user["2FAEnabled"])
-    print("type: username password  | Enable user and set password")
+    print("type: username password  | Enable user and set password. Make sure the user already has a password set.")
     print("type: username disable   | Disable user")
     print("type: username enable    | Enable user")
     print("type: username totp      | Prints QR code to scan with TOTP app (e.g. Google Authenticator)")
+    print("Type: reload             | Reloads the user list")
     command = input(">")
     args = command.split(' ')
     if len(args) < 2:
         continue
     for user in config["users"]:
-        if user["name"] == args[0]:
+        if user["name"] == args[0]:# find user specified
             if args[1] == "password":
                 password = input("Enter password (leave empty to generate password(recommended)):")
                 alphabet = string.ascii_letters + string.digits
@@ -117,6 +145,7 @@ while True:
             if args[1] == "totp":
                 if user.get("token") is None:#set token
                     user["token"] = pyotp.random_base32()
+                # generate QR code
                 qr = qrcode.QRCode(
                 version=1,
                 error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -130,15 +159,16 @@ while True:
                 pixels = list(img.getdata())
                 width = img.size[0]
                 asciiImg = []
+                # print QR to console
                 for i, p in enumerate(pixels):
                     if pixels[i] < 100:
                         asciiImg.append("  ")
                     else:
-                        asciiImg.append("##")
+                        asciiImg.append("██")
                     if (i + 1) % width == 0:
                         asciiImg.append("\n")
                 sys.stdout.write(''.join(asciiImg))
                 print("otpauth:" + totp)
                 input("Press enter to continue")
                 continue
-            
+

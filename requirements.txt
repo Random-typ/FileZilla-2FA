@@ -1,0 +1,4 @@
+lxml==4.9.3
+pyotp==2.9.0
+pyuac==0.0.3
+qrcode==7.4.2
