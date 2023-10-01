@@ -104,7 +104,6 @@ box_size=1,# pixels per box
 border=2,#border thickness
 )
 
-input()
 if config.get("issuer") is None or len(config.get("issuer")) == 0:
     print("Please specify an issuer name. This is the name that will be displayed in the authenticator app. I can recommend using your hostname.")
     config["issuer"] = input("issuer name:")
