@@ -81,13 +81,13 @@ def updatePasswords():
 
 # check privileges. C:/ProgramData/filezilla-server/users.xml needs admin privileges
 if not pyuac.isUserAdmin():
-    input("Script has to be run as admin. Press enter to run script as admin.")
+    #input("Script has to be run as admin. Press enter to run script as admin.")
     pyuac.runAsAdmin()
 
 # create config 
 if not os.path.exists('config.json'):
     open('config.json', 'w').write(json.dumps({
-        "ftp-users": "C:/ProgramData/filezilla-server/users.xml",
+        "ftp-users": f"{os.getenv('PROGRAMDATA')}/filezilla-server/users.xml",
         "users": [],
         }))
 
