@@ -3,14 +3,14 @@ This python script adds 2FA to your FileZilla FTP server.
 
 # Setup
 Run **run.bat**, make sure you have **python 3.11.2 or newer** installed.  
-The first lines in the console show the available users and their 2FA status. You cannot add users though this script. You have to add them with the FTP server. 
+The first lines in the console show the available users and their 2FA status. You cannot add users through this script. You have to add them via the FTP servers Admin panel.  
 You can reload the user list by typing ```reload``` and hitting enter.  
 To add 2FA to a user type their name from the user list followed by ```password```.  E.g. ```FTPUser password```. Hit enter.  
-After you have followed the instructions type the same user name followed by ```totp```.  E.g. ```FTPUser password```. Hit enter. 
+After you have followed the instructions type the same user name followed by ```totp```.  E.g. ```FTPUser totp```. Hit enter. 
 Now you see a QR code, you can scan it with your authenticator app of choice. E.g. Google Authenticator.  
 
 # Login
-You login with your usual credentials, however after the password you type the 2FA code (no spaces). 
+You login with your usual credentials, but you append the password with your 2FA code from your authenticator (no spaces). 
 
 # How it works
 The python script changes the password hash stored in the FileZilla configuration file every 30 seconds and tells the server to reload the configuration file.
